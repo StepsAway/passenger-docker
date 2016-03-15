@@ -1,7 +1,7 @@
-FROM phusion/baseimage:0.9.18
-MAINTAINER Phusion <info@phusion.nl>
+FROM stepsaway/baseimage-##IMAGE##
+MAINTAINER StepsAway <devgru@stepsaway.com>
 
-ADD . /pd_build
+COPY . /pd_build
 RUN /pd_build/install.sh
 CMD ["/sbin/my_init"]
 EXPOSE 80 443

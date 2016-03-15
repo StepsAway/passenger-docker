@@ -1,133 +1,60 @@
-NAME = phusion/passenger
-VERSION = 0.9.18
+NAME = stepsaway/passenger
+VERSION = 1.0.0
 
-.PHONY: all build_all \
-	build_customizable \
-	build_ruby19 build_ruby20 build_ruby21 build_ruby22 build_jruby90 \
-	build_nodejs build_full \
-	tag_latest release clean clean_images
-
-all: build_all
+.PHONY: build_all clean clean_images \
+	build_ruby22 build_ruby23 \
+	release test
 
 build_all: \
-	build_customizable \
-	build_ruby19 \
-	build_ruby20 \
-	build_ruby21 \
-	build_ruby22 \
-	build_jruby90 \
-	build_nodejs \
-	build_full
+	build_ruby225 \
+	build_ruby230 \
+	build_ruby231
 
-# Docker doesn't support sharing files between different Dockerfiles. -_-
-# So we copy things around.
-build_customizable:
-	rm -rf customizable_image
-	cp -pR image customizable_image
-	docker build -t $(NAME)-customizable:$(VERSION) --rm customizable_image
+build_ruby225:
+	rm -rf ruby225_image
+	cp -pR image ruby225_image
+	echo ruby225=1 >> ruby225_image/buildconfig
+	echo final=1 >> ruby225_image/buildconfig
+	sed -i -e "s/##IMAGE##/ruby22:5-$(VERSION)/" ruby225_image/Dockerfile
+	docker build -t $(NAME)-ruby22:5-$(VERSION) --rm ruby225_image
 
-build_ruby19:
-	rm -rf ruby19_image
-	cp -pR image ruby19_image
-	echo ruby19=1 >> ruby19_image/buildconfig
-	echo final=1 >> ruby19_image/buildconfig
-	docker build -t $(NAME)-ruby19:$(VERSION) --rm ruby19_image
+build_ruby230:
+	rm -rf ruby230_image
+	cp -pR image ruby230_image
+	echo ruby230=1 >> ruby230_image/buildconfig
+	echo final=1 >> ruby230_image/buildconfig
+	sed -i -e "s/##IMAGE##/ruby23:0-$(VERSION)/" ruby230_image/Dockerfile
+	docker build -t $(NAME)-ruby23:0-$(VERSION) --rm ruby230_image
 
-build_ruby20:
-	rm -rf ruby20_image
-	cp -pR image ruby20_image
-	echo ruby20=1 >> ruby20_image/buildconfig
-	echo final=1 >> ruby20_image/buildconfig
-	docker build -t $(NAME)-ruby20:$(VERSION) --rm ruby20_image
-
-build_ruby21:
-	rm -rf ruby21_image
-	cp -pR image ruby21_image
-	echo ruby21=1 >> ruby21_image/buildconfig
-	echo final=1 >> ruby21_image/buildconfig
-	docker build -t $(NAME)-ruby21:$(VERSION) --rm ruby21_image
-
-build_ruby22:
-	rm -rf ruby22_image
-	cp -pR image ruby22_image
-	echo ruby22=1 >> ruby22_image/buildconfig
-	echo final=1 >> ruby22_image/buildconfig
-	docker build -t $(NAME)-ruby22:$(VERSION) --rm ruby22_image
-
-build_jruby90:
-	rm -rf jruby90_image
-	cp -pR image jruby90_image
-	echo jruby90=1 >> jruby90_image/buildconfig
-	echo final=1 >> jruby90_image/buildconfig
-	docker build -t $(NAME)-jruby90:$(VERSION) --rm jruby90_image
-
-build_nodejs:
-	rm -rf nodejs_image
-	cp -pR image nodejs_image
-	echo nodejs=1 >> nodejs_image/buildconfig
-	echo final=1 >> nodejs_image/buildconfig
-	docker build -t $(NAME)-nodejs:$(VERSION) --rm nodejs_image
-
-build_full:
-	rm -rf full_image
-	cp -pR image full_image
-	echo ruby19=1 >> full_image/buildconfig
-	echo ruby20=1 >> full_image/buildconfig
-	echo ruby21=1 >> full_image/buildconfig
-	echo ruby22=1 >> full_image/buildconfig
-	echo jruby90=1 >> full_image/buildconfig
-	echo python=1 >> full_image/buildconfig
-	echo nodejs=1 >> full_image/buildconfig
-	echo redis=1 >> full_image/buildconfig
-	echo memcached=1 >> full_image/buildconfig
-	echo final=1 >> full_image/buildconfig
-	docker build -t $(NAME)-full:$(VERSION) --rm full_image
-
-tag_latest:
-	docker tag -f $(NAME)-customizable:$(VERSION) $(NAME)-customizable:latest
-	docker tag -f $(NAME)-ruby19:$(VERSION) $(NAME)-ruby19:latest
-	docker tag -f $(NAME)-ruby20:$(VERSION) $(NAME)-ruby20:latest
-	docker tag -f $(NAME)-ruby21:$(VERSION) $(NAME)-ruby21:latest
-	docker tag -f $(NAME)-ruby22:$(VERSION) $(NAME)-ruby22:latest
-	docker tag -f $(NAME)-jruby90:$(VERSION) $(NAME)-jruby90:latest
-	docker tag -f $(NAME)-nodejs:$(VERSION) $(NAME)-nodejs:latest
-	docker tag -f $(NAME)-full:$(VERSION) $(NAME)-full:latest
-
-release: tag_latest
-	@if ! docker images $(NAME)-customizable | awk '{ print $$2 }' | grep -q -F $(VERSION); then echo "$(NAME)-customizable version $(VERSION) is not yet built. Please run 'make build'"; false; fi
-	@if ! docker images $(NAME)-ruby19 | awk '{ print $$2 }' | grep -q -F $(VERSION); then echo "$(NAME)-ruby19 version $(VERSION) is not yet built. Please run 'make build'"; false; fi
-	@if ! docker images $(NAME)-ruby20 | awk '{ print $$2 }' | grep -q -F $(VERSION); then echo "$(NAME)-ruby20 version $(VERSION) is not yet built. Please run 'make build'"; false; fi
-	@if ! docker images $(NAME)-ruby21 | awk '{ print $$2 }' | grep -q -F $(VERSION); then echo "$(NAME)-ruby21 version $(VERSION) is not yet built. Please run 'make build'"; false; fi
-	@if ! docker images $(NAME)-ruby22 | awk '{ print $$2 }' | grep -q -F $(VERSION); then echo "$(NAME)-ruby22 version $(VERSION) is not yet built. Please run 'make build'"; false; fi
-	@if ! docker images $(NAME)-jruby90 | awk '{ print $$2 }' | grep -q -F $(VERSION); then echo "$(NAME)-jruby90 version $(VERSION) is not yet built. Please run 'make build'"; false; fi
-	@if ! docker images $(NAME)-nodejs | awk '{ print $$2 }' | grep -q -F $(VERSION); then echo "$(NAME)-nodejs version $(VERSION) is not yet built. Please run 'make build'"; false; fi
-	@if ! docker images $(NAME)-full | awk '{ print $$2 }' | grep -q -F $(VERSION); then echo "$(NAME)-full version $(VERSION) is not yet built. Please run 'make build'"; false; fi
-	docker push $(NAME)-customizable
-	docker push $(NAME)-ruby19
-	docker push $(NAME)-ruby20
-	docker push $(NAME)-ruby21
-	docker push $(NAME)-ruby22
-	docker push $(NAME)-jruby90
-	docker push $(NAME)-nodejs
-	docker push $(NAME)-full
-	@echo "*** Don't forget to create a tag. git tag rel-$(VERSION) && git push origin rel-$(VERSION)"
+build_ruby231:
+	rm -rf ruby231_image
+	cp -pR image ruby231_image
+	echo ruby231=1 >> ruby231_image/buildconfig
+	echo final=1 >> ruby231_image/buildconfig
+	sed -i -e "s/##IMAGE##/ruby23:1-$(VERSION)/" ruby231_image/Dockerfile
+	docker build -t $(NAME)-ruby23:1-$(VERSION) --rm ruby231_image
 
 clean:
-	rm -rf customizable_image
-	rm -rf ruby19_image
-	rm -rf ruby20_image
-	rm -rf ruby21_image
-	rm -rf ruby22_image
-	rm -rf jruby90_image
-	rm -rf nodejs_image
-	rm -rf full_image
+	rm -rf ruby225_image
+	rm -rf ruby230_image
+	rm -rf ruby231_image
 
 clean_images:
-	docker rmi phusion/passenger-customizable:latest phusion/passenger-customizable:$(VERSION) || true
-	docker rmi phusion/passenger-ruby19:latest phusion/passenger-ruby19:$(VERSION) || true
-	docker rmi phusion/passenger-ruby20:latest phusion/passenger-ruby20:$(VERSION) || true
-	docker rmi phusion/passenger-ruby21:latest phusion/passenger-ruby21:$(VERSION) || true
-	docker rmi phusion/passenger-ruby22:latest phusion/passenger-ruby22:$(VERSION) || true
-	docker rmi phusion/passenger-jruby90:latest phusion/passenger-jruby90:$(VERSION) || true
-	docker rmi phusion/passenger-nodejs:latest phusion/passenger-nodejs:$(VERSION) || true
-	docker rmi phusion/passenger-full:latest phusion/passenger-full:$(VERSION) || true
+	@if docker images $(NAME)-ruby22:5-$(VERSION) | awk '{ print $$2 }' | grep -q -F $(VERSION); then docker rmi -f $(NAME)-ruby22:5-$(VERSION) || true; fi
+	@if docker images $(NAME)-ruby23:0-$(VERSION) | awk '{ print $$2 }' | grep -q -F 0-$(VERSION); then docker rmi -f $(NAME)-ruby23:0-$(VERSION) || true; fi
+	@if docker images $(NAME)-ruby23:1-$(VERSION) | awk '{ print $$2 }' | grep -q -F 1-$(VERSION); then docker rmi -f $(NAME)-ruby23:1-$(VERSION) || true; fi
+
+release: test
+	@if ! docker images $(NAME)-ruby22:5-$(VERSION) | awk '{ print $$2 }' | grep -q -F 5-$(VERSION); then echo "$(NAME)-ruby23:5-$(VERSION) is not yet built. Please run 'make build'"; false; fi
+	@if ! docker images $(NAME)-ruby23:0-$(VERSION) | awk '{ print $$2 }' | grep -q -F 0-$(VERSION); then echo "$(NAME)-ruby23:0-$(VERSION) is not yet built. Please run 'make build'"; false; fi
+	@if ! docker images $(NAME)-ruby23:1-$(VERSION) | awk '{ print $$2 }' | grep -q -F 1-$(VERSION); then echo "$(NAME)-ruby23:1-$(VERSION) is not yet built. Please run 'make build'"; false; fi
+	@if ! head -n 1 Changelog.md | grep -q 'release date'; then echo 'Please note the release date in Changelog.md.' && false; fi
+	docker push $(NAME)-ruby22:5-$(VERSION)
+	docker push $(NAME)-ruby23:0-$(VERSION)
+	docker push $(NAME)-ruby23:1-$(VERSION)
+	@echo "*** Don't forget to create a tag. git tag $(VERSION) && git push origin $(VERSION)"
+
+test:
+	@if docker images $(NAME)-ruby22:5-$(VERSION) | awk '{ print $$2 }' | grep -q -F $(VERSION); then env NAME=$(NAME)-ruby22:5 RUBY='2.2.5' VERSION=$(VERSION) ./test/runner.sh; fi
+	@if docker images $(NAME)-ruby23:0-$(VERSION) | awk '{ print $$2 }' | grep -q -F $(VERSION); then env NAME=$(NAME)-ruby23:0 RUBY='2.3.0' VERSION=$(VERSION) ./test/runner.sh; fi
+	@if docker images $(NAME)-ruby23:1-$(VERSION) | awk '{ print $$2 }' | grep -q -F $(VERSION); then env NAME=$(NAME)-ruby23:1 RUBY='2.3.1' VERSION=$(VERSION) ./test/runner.sh; fi

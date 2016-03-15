@@ -11,3 +11,7 @@ else
 	rm -f /pd_build/{install,enable_repos,prepare,pups,nginx-passenger,finalize}.sh
 	rm -f /pd_build/{Dockerfile,insecure_key*}
 fi
+
+# Set ruby to the proper versions
+rm /usr/bin/ruby
+ln -s /usr/local/bin/ruby /usr/bin/ruby

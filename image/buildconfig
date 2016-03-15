@@ -3,9 +3,9 @@ export DEBIAN_FRONTEND=noninteractive
 
 function minimal_apt_get_install()
 {
+	echo $DEBIAN_FRONTEND
 	if [[ ! -e /var/lib/apt/lists/lock ]]; then
 		apt-get update
 	fi
-	apt-get install -y --no-install-recommends "$@"
+	apt-get install -y --force-yes --no-install-recommends "$@"
 }
-
