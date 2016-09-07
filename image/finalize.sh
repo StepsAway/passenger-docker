@@ -14,4 +14,8 @@ fi
 
 # Set ruby to the proper versions
 rm /usr/bin/ruby
-ln -s /usr/local/bin/ruby /usr/bin/ruby
+if [[ "$jruby" = 0 ]]; then
+	ln -s /usr/local/bin/ruby /usr/bin/ruby
+elif [[ "$jruby" = 1 ]]; then
+	ln -s /usr/local/jruby/bin/jruby /usr/bin/ruby
+fi
