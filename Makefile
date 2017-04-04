@@ -1,5 +1,5 @@
 NAME = stepsaway/passenger
-VERSION = 2.0.0
+VERSION = 2.0.1
 
 .PHONY: build_all clean clean_images \
 	build_ruby230 build_ruby231 build_ruby240 build_jruby1726 \
