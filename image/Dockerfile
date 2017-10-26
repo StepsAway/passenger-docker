@@ -1,5 +1,5 @@
 FROM stepsaway/baseimage-##IMAGE##
-MAINTAINER StepsAway <devgru@stepsaway.com>
+LABEL maintainer="StepsAway <infra-ops@stepsaway.com>"
 
 COPY . /pd_build
 RUN /pd_build/install.sh
